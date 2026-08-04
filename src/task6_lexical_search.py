@@ -15,10 +15,68 @@ BM25 hoạt động thế nào:
     - k1=1.5 (term saturation), b=0.75 (length normalization)
 """
 
+import re
 from pathlib import Path
 
-# TODO: Load corpus từ data/standardized/ hoặc từ vector store
+from rank_bm25 import BM25Okapi
+
+STANDARDIZED_DIR = Path(__file__).parent.parent / "data" / "standardized"
+
+# Lazily populated corpus/index so the module works even if conversion runs later.
 CORPUS: list[dict] = []  # List of {'content': str, 'metadata': dict}
+_TOKENIZED_CORPUS: list[list[str]] = []
+_BM25_INDEX: BM25Okapi | None = None
+
+
+def _tokenize(text: str) -> list[str]:
+    """Tokenize text with a simple unicode-aware tokenizer."""
+    return re.findall(r"\w+", text.lower(), flags=re.UNICODE)
+
+
+def _load_corpus() -> list[dict]:
+    """Load all markdown documents from data/standardized/."""
+    documents: list[dict] = []
+
+    if not STANDARDIZED_DIR.exists():
+        return documents
+
+    for md_file in sorted(STANDARDIZED_DIR.rglob("*.md")):
+        if not md_file.is_file():
+            continue
+
+        content = md_file.read_text(encoding="utf-8")
+        relative_path = md_file.relative_to(STANDARDIZED_DIR)
+        doc_type = relative_path.parts[0] if relative_path.parts else "unknown"
+        documents.append(
+            {
+                "content": content,
+                "metadata": {
+                    "source": str(relative_path),
+                    "title": md_file.stem,
+                    "type": doc_type,
+                },
+            }
+        )
+
+    return documents
+
+
+def _ensure_index() -> BM25Okapi | None:
+    """Build the corpus and BM25 index on first use."""
+    global CORPUS, _TOKENIZED_CORPUS, _BM25_INDEX
+
+    if _BM25_INDEX is not None:
+        return _BM25_INDEX
+
+    CORPUS = _load_corpus()
+    if not CORPUS:
+        _TOKENIZED_CORPUS = []
+        _BM25_INDEX = None
+        return None
+
+    _TOKENIZED_CORPUS = [_tokenize(doc["content"]) for doc in CORPUS]
+    _BM25_INDEX = BM25Okapi(_TOKENIZED_CORPUS)
+    return _BM25_INDEX
 
 
 def build_bm25_index(corpus: list[dict]):
@@ -28,15 +86,8 @@ def build_bm25_index(corpus: list[dict]):
     Args:
         corpus: List of {'content': str, 'metadata': dict}
     """
-    # TODO: Implement BM25 index
-    #
-    # from rank_bm25 import BM25Okapi
-    #
-    # # Tokenize - có thể đơn giản split(), hoặc dùng underthesea cho tiếng Việt
-    # tokenized_corpus = [doc["content"].lower().split() for doc in corpus]
-    # bm25 = BM25Okapi(tokenized_corpus)
-    # return bm25
-    raise NotImplementedError("Implement build_bm25_index")
+    tokenized_corpus = [_tokenize(doc["content"]) for doc in corpus if doc.get("content")]
+    return BM25Okapi(tokenized_corpus)
 
 
 def lexical_search(query: str, top_k: int = 10) -> list[dict]:
@@ -55,25 +106,31 @@ def lexical_search(query: str, top_k: int = 10) -> list[dict]:
         }
         Sorted by score descending.
     """
-    # TODO: Implement lexical search
-    #
-    # tokenized_query = query.lower().split()
-    # scores = bm25.get_scores(tokenized_query)
-    #
-    # # Get top_k indices
-    # import numpy as np
-    # top_indices = np.argsort(scores)[::-1][:top_k]
-    #
-    # results = []
-    # for idx in top_indices:
-    #     if scores[idx] > 0:
-    #         results.append({
-    #             "content": CORPUS[idx]["content"],
-    #             "score": float(scores[idx]),
-    #             "metadata": CORPUS[idx]["metadata"]
-    #         })
-    # return results
-    raise NotImplementedError("Implement lexical_search")
+    bm25 = _ensure_index()
+    if bm25 is None or not CORPUS:
+        return []
+
+    tokenized_query = _tokenize(query)
+    if not tokenized_query:
+        return []
+
+    scores = bm25.get_scores(tokenized_query)
+    ranked_indices = sorted(range(len(scores)), key=lambda idx: scores[idx], reverse=True)
+
+    results: list[dict] = []
+    for idx in ranked_indices[:top_k]:
+        score = float(scores[idx])
+        if score <= 0:
+            continue
+        results.append(
+            {
+                "content": CORPUS[idx]["content"],
+                "score": score,
+                "metadata": CORPUS[idx]["metadata"],
+            }
+        )
+
+    return results
 
 
 if __name__ == "__main__":
