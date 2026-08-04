@@ -568,5 +568,91 @@ class TestTask10(unittest.TestCase):
 # Summary
 # ===========================================================================
 
+
+class SymbolicTextTestResult(unittest.TextTestResult):
+    """Print compact pass/fail symbols and per-task summaries."""
+
+    GREEN = "\033[32m"
+    RED = "\033[31m"
+    YELLOW = "\033[33m"
+    CYAN = "\033[36m"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._current_task = None
+        self._task_order = []
+        self._task_stats = {}
+
+    def _use_color(self) -> bool:
+        return getattr(self.stream, "isatty", lambda: False)()
+
+    def _styled(self, text: str, color: str) -> str:
+        if not self._use_color():
+            return text
+        return f"{color}{text}{self.RESET}"
+
+    def _task_name(self, test) -> str:
+        class_name = test.__class__.__name__
+        if class_name.startswith("TestTask"):
+            return class_name.replace("Test", "", 1)
+        return class_name
+
+    def _ensure_task_bucket(self, task_name: str):
+        if task_name not in self._task_stats:
+            self._task_stats[task_name] = {"pass": 0, "fail": 0, "error": 0, "skip": 0}
+            self._task_order.append(task_name)
+
+    def startTest(self, test):
+        task_name = self._task_name(test)
+        self._ensure_task_bucket(task_name)
+        if task_name != self._current_task:
+            self._current_task = task_name
+            self.stream.writeln(
+                self._styled(f"\n== {task_name} ==", f"{self.BOLD}{self.CYAN}")
+            )
+        super().startTest(test)
+
+    def addSuccess(self, test):
+        super().addSuccess(test)
+        self._task_stats[self._task_name(test)]["pass"] += 1
+        self.stream.writeln(self._styled(f"✓ {test._testMethodName}", self.GREEN))
+
+    def addFailure(self, test, err):
+        super().addFailure(test, err)
+        self._task_stats[self._task_name(test)]["fail"] += 1
+        self.stream.writeln(self._styled(f"✗ {test._testMethodName}", self.RED))
+
+    def addError(self, test, err):
+        super().addError(test, err)
+        self._task_stats[self._task_name(test)]["error"] += 1
+        self.stream.writeln(self._styled(f"✗ {test._testMethodName} (error)", self.RED))
+
+    def addSkip(self, test, reason):
+        super().addSkip(test, reason)
+        self._task_stats[self._task_name(test)]["skip"] += 1
+        self.stream.writeln(self._styled(f"- {test._testMethodName} (skipped: {reason})", self.YELLOW))
+
+    def stopTestRun(self):
+        super().stopTestRun()
+        self.stream.writeln(self._styled("\n== Task Summary ==", f"{self.BOLD}{self.CYAN}"))
+        for task_name in self._task_order:
+            stats = self._task_stats[task_name]
+            total = stats["pass"] + stats["fail"] + stats["error"] + stats["skip"]
+            summary = (
+                f"{task_name}: total={total}, "
+                f"pass={stats['pass']}, fail={stats['fail']}, "
+                f"error={stats['error']}, skip={stats['skip']}"
+            )
+            self.stream.writeln(self._styled(summary, self.CYAN))
+
+
+class SymbolicTextTestRunner(unittest.TextTestRunner):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("resultclass", SymbolicTextTestResult)
+        super().__init__(*args, **kwargs)
+
+
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    unittest.main(testRunner=SymbolicTextTestRunner, verbosity=1)
