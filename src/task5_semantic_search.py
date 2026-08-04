@@ -15,27 +15,40 @@ from typing import List, Dict, Any, Optional
 
 CHROMA_DIR = Path(__file__).parent.parent / "chroma_db"
 COLLECTION_NAME = "university_services_docs"
-EMBEDDING_MODEL_NAME = "BAAI/bge-m3"
+EMBEDDING_MODEL_NAME = "text-embedding-3-small"
 
-# Singleton cache cho Embedding Model và Chroma Client
-_MODEL_CACHE = None
+# Singleton cache cho OpenAI Client và Chroma Client
+_OPENAI_CLIENT = None
 _COLLECTION_CACHE = None
 
 
-def _get_embedding_model():
-    """Tải và cache embedding model."""
-    global _MODEL_CACHE
-    if _MODEL_CACHE is None:
-        try:
-            from sentence_transformers import SentenceTransformer
-            _MODEL_CACHE = SentenceTransformer(EMBEDDING_MODEL_NAME)
-        except BaseException:
-            try:
-                from sentence_transformers import SentenceTransformer
-                _MODEL_CACHE = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
-            except BaseException:
-                _MODEL_CACHE = None
-    return _MODEL_CACHE
+def _get_openai_client():
+    """Tạo và cache OpenAI client."""
+    global _OPENAI_CLIENT
+    if _OPENAI_CLIENT is None:
+        import os
+        from dotenv import load_dotenv
+        from openai import OpenAI
+        load_dotenv()
+        api_key = os.getenv("OPENAI_API_KEY")
+        if api_key:
+            _OPENAI_CLIENT = OpenAI(api_key=api_key)
+    return _OPENAI_CLIENT
+
+
+def _embed_query(text: str) -> list[float] | None:
+    """Embed a single query text using OpenAI API."""
+    client = _get_openai_client()
+    if client is None:
+        return None
+    try:
+        response = client.embeddings.create(
+            input=[text],
+            model=EMBEDDING_MODEL_NAME,
+        )
+        return response.data[0].embedding
+    except Exception:
+        return None
 
 
 def _get_collection():
@@ -104,10 +117,9 @@ def semantic_search(query: str, top_k: int = 10, use_hyde: bool = True) -> list[
         search_text = query
 
     try:
-        model = _get_embedding_model()
-        if model is None:
+        query_vector = _embed_query(search_text)
+        if query_vector is None:
             return []
-        query_vector = model.encode(search_text).tolist()
 
         collection = _get_collection()
         if collection is None or collection.count() == 0:

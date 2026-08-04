@@ -8,7 +8,7 @@ so it supports the bilingual university-services corpus without an external API.
 
 from __future__ import annotations
 
-from functools import lru_cache
+import os
 from pathlib import Path
 from typing import Any
 
@@ -21,9 +21,9 @@ CHUNK_SIZE = 800
 CHUNK_OVERLAP = 100
 CHUNKING_METHOD = "recursive"
 
-# BGE-M3 is multilingual and produces 1024-dimensional vectors.
-EMBEDDING_MODEL = "BAAI/bge-m3"
-EMBEDDING_DIM = 1024
+# OpenAI text-embedding-3-small (API-based, 1536 dimensions).
+EMBEDDING_MODEL = "text-embedding-3-small"
+EMBEDDING_DIM = 1536
 VECTOR_STORE = "chromadb"
 COLLECTION_NAME = "university_services_docs"
 
@@ -104,34 +104,47 @@ def chunk_documents(documents: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return chunks
 
 
-@lru_cache(maxsize=1)
-def get_embedding_model():
-    """Load the embedding model once per process."""
-    try:
-        from sentence_transformers import SentenceTransformer
-    except ImportError as exc:
-        raise ImportError("Cần cài sentence-transformers để chạy Task 4.") from exc
-    return SentenceTransformer(EMBEDDING_MODEL)
+def _get_openai_client():
+    """Create an OpenAI client using the API key from environment."""
+    from openai import OpenAI
+    from dotenv import load_dotenv
+    load_dotenv()
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY chưa được thiết lập trong .env")
+    return OpenAI(api_key=api_key)
 
 
 def embed_chunks(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Add normalized BGE-M3 embeddings to each chunk."""
+    """Add OpenAI text-embedding-3-small embeddings to each chunk."""
     if not chunks:
         return []
 
-    embeddings = get_embedding_model().encode(
-        [chunk["content"] for chunk in chunks],
-        batch_size=32,
-        show_progress_bar=True,
-        normalize_embeddings=True,
-    )
-    for chunk, embedding in zip(chunks, embeddings):
-        vector = embedding.tolist() if hasattr(embedding, "tolist") else list(embedding)
-        if len(vector) != EMBEDDING_DIM:
+    client = _get_openai_client()
+    texts = [chunk["content"] for chunk in chunks]
+
+    # OpenAI API supports batch embedding, process in batches of 100
+    BATCH_SIZE = 100
+    all_embeddings: list[list[float]] = []
+
+    for i in range(0, len(texts), BATCH_SIZE):
+        batch = texts[i:i + BATCH_SIZE]
+        print(f"  Embedding batch {i // BATCH_SIZE + 1}/{(len(texts) - 1) // BATCH_SIZE + 1} ({len(batch)} chunks)...")
+        response = client.embeddings.create(
+            input=batch,
+            model=EMBEDDING_MODEL,
+        )
+        # Sort by index to preserve order
+        sorted_data = sorted(response.data, key=lambda x: x.index)
+        batch_embeddings = [item.embedding for item in sorted_data]
+        all_embeddings.extend(batch_embeddings)
+
+    for chunk, embedding in zip(chunks, all_embeddings):
+        if len(embedding) != EMBEDDING_DIM:
             raise ValueError(
-                f"Embedding model trả về {len(vector)} chiều; cần {EMBEDDING_DIM}."
+                f"Embedding model trả về {len(embedding)} chiều; cần {EMBEDDING_DIM}."
             )
-        chunk["embedding"] = [float(value) for value in vector]
+        chunk["embedding"] = [float(value) for value in embedding]
     return chunks
 
 
@@ -203,7 +216,7 @@ def run_pipeline() -> None:
     chunks = chunk_documents(documents)
     embedded_chunks = embed_chunks(chunks)
     collection = index_to_vectorstore(embedded_chunks)
-    print(f"Đã load {len(documents)} tài liệu, index {collection.count()} chunks vào {CHROMA_DIR}.")
+    print(f"Da load {len(documents)} tai lieu, index {collection.count()} chunks vao {CHROMA_DIR}.")
 
 
 if __name__ == "__main__":
