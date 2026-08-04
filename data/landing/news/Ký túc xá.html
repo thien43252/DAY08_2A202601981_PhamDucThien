@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<!-- saved from url=(0061)https://handbook.uet.vnu.edu.vn/K%C3%BD%20t%C3%BAc%20x%C3%A1/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./Ký túc xá_files/style.css">
+    <link rel="stylesheet" href="./Ký túc xá_files/nav.css">
+    <link rel="stylesheet" href="./Ký túc xá_files/footer.css">
+    <link rel="stylesheet" href="./Ký túc xá_files/font-awesome.min.css">
+    <link rel="stylesheet" href="./Ký túc xá_files/css2">
+    <title>Ký túc xá</title>
+</head>
+
+<body>
+
+    <!-- navbar -->
+    <div class="nav-bar">
+        <div class="nav">
+            <img src="./Ký túc xá_files/logo.png" alt="logo" class="logo">
+            <button class="menu-button" onclick="showNav()"><i class="fa fa-bars"></i></button>
+        </div>
+        <div id="nav-items" class="nav-items">
+            <buton class="nav-item">
+                <a href="https://handbook.uet.vnu.edu.vn/l%E1%BB%8Bch%20s%E1%BB%AD%20-%20truy%E1%BB%81n%20th%E1%BB%91ng/" style="color:white; text-decoration: none;">Lịch sử - Truyển
+                    thống</a>
+            </buton>
+            <buton class="nav-item" id="hoc-tap" onclick="dropDown(&#39;hoc-tap&#39;)">
+                <p>Học tập</p>
+                <div class="dropdown-content">
+                    <a href="https://handbook.uet.vnu.edu.vn/Th%C6%B0%20vi%E1%BB%87n/">Thư viện UET</a>
+                    <a href="https://handbook.uet.vnu.edu.vn/N%E1%BB%99i%20quy%20-%20quy%20ch%E1%BA%BF/">Nội quy - Quy chế</a>
+                    <a href="https://handbook.uet.vnu.edu.vn/K%E1%BA%BF%20ho%E1%BA%A1ch%20h%E1%BB%8Dc%20t%E1%BA%ADp%202025-2026.pdf">Kế hoạch học tập</a>
+                    <a href="https://vnueduvn-my.sharepoint.com/:x:/g/personal/dungnn09_vnu_edu_vn/Ea_6pFpGWIRJlMrQVsBX7hEBGhWjl9Xuo6M0gOpVmvUg5A?rtime=Uh-O2Pii3Eg">Tra
+                        cứu chuẩn đầu ra</a>
+                </div>
+            </buton>
+            <buton class="nav-item" id="dong-hanh-cung-sv" onclick="dropDown(&#39;dong-hanh-cung-sv&#39;)">
+                <p>Dành cho sinh viên</p>
+                <div class="dropdown-content">
+                    <a href="https://ctsv.uet.vnu.edu.vn:3300/">Đặt lịch đối thoại - Đặt câu hỏi</a>
+
+                    <a href="https://handbook.uet.vnu.edu.vn/H%E1%BB%8Dc%20b%E1%BB%95ng/">Học bổng - Điểm rèn luyện</a>
+                    <a href="https://vieclam.uet.vnu.edu.vn/">Tuyển dụng - Việc làm</a>
+                    <a href="https://handbook.uet.vnu.edu.vn/K%C3%BD%20t%C3%BAc%20x%C3%A1/">Ký túc xá</a>
+                    <a href="https://handbook.uet.vnu.edu.vn/Kh%C3%A1m%20ch%E1%BB%AFa%20b%E1%BB%87nh/">Khám chữa bệnh</a>
+                    <a href="https://handbook.uet.vnu.edu.vn/Th%E1%BB%B1c%20t%E1%BA%ADp%20th%E1%BB%B1c%20t%E1%BA%BF/">Thực tập - Thực tế</a>
+                    <a href="https://handbook.uet.vnu.edu.vn/Trao%20%C4%91%E1%BB%95i%20sinh%20vi%C3%AAn/">Trao đổi sinh viên</a>
+                    <a href="https://handbook.uet.vnu.edu.vn/H%E1%BB%8Dc%20ph%C3%AD%20-%20Ch%E1%BA%BF%20%C4%91%E1%BB%99%20ch%C3%ADnh%20s%C3%A1ch/">Học phí - Chế độ chính sách</a>
+                    <a href="https://handbook.uet.vnu.edu.vn/Th%E1%BB%A7%20t%E1%BB%A5c%20h%C3%A0nh%20ch%C3%ADnh%20m%E1%BB%99t%20c%E1%BB%ADa/">Thủ tục hành chính một cửa</a>
+                    <a href="https://handbook.uet.vnu.edu.vn/c%C3%A1c%20c%E1%BB%95ng%20th%C3%B4ng%20tin%20h%E1%BB%AFu%20%C3%ADch/">Các cổng thông tin hữu ích</a>
+                    <a href="https://ctsv.uet.vnu.edu.vn:3100/">Thông tin nhà trọ</a>
+                    <a href="https://handbook.uet.vnu.edu.vn/Ho%E1%BA%A1t%20%C4%91%E1%BB%99ng%20%C4%90o%C3%A0n-H%E1%BB%99i/">Thông tin về Đoàn - Hội</a>
+                </div>
+            </buton>
+            <buton class="nav-item" id="danh-cho-hv/ncs" onclick="dropDown(&#39;danh-cho-hv/ncs&#39;)">
+                <p>Dành cho HV/NCS</p>
+                <div class="dropdown-content">
+                    <a href="https://uet.vnu.edu.vn/category/dao-tao/dao-tao-sau-dai-hoc/">Thông báo</a>
+                    <a href="https://uet.vnu.edu.vn/category/van-ban-bieu-mau/">Văn bản, biểu mẫu</a>
+                    <a href="https://drive.google.com/drive/folders/1_WNbru-310wnBAKRCwA5Xy2l9thzlIiy?usp=sharing">Nội
+                        quy – Quy chế</a>
+                    <a href="https://drive.google.com/drive/folders/1FceKtQE3qS3l1rlqxrQedTYQ17AL1lvg?usp=sharing">Kế
+                        hoạch học tập</a>
+                    <a href="https://drive.google.com/file/d/1veVCVwmIe6nhwX5X4EER_WcsIApyK11f/view?usp=sharing">Định
+                        mức học phí</a>
+                </div>
+            </buton>
+            <buton class="nav-item">
+                <a href="https://handbook.uet.vnu.edu.vn/C%E1%BA%A9m%20nang%20s%E1%BB%A9c%20kh%E1%BB%8Fe%20tinh%20th%E1%BA%A7n%20cho%20SV%20(1).pdf" style="color: white; text-decoration: none">Cẩm nang sức
+                    khỏe</a>
+            </buton>
+            <buton class="nav-item">
+                <a href="https://ctsv.uet.vnu.edu.vn:4000/login" style="color: white; text-decoration: none">Khảo sát
+                    người học</a>
+            </buton>
+            <buton class="nav-item">
+                <a href="https://handbook.uet.vnu.edu.vn/Th%C3%B4ng%20tin%20li%C3%AAn%20h%E1%BB%87/" style="color:white; text-decoration: none;">Thông tin liên hệ</a>
+            </buton>
+        </div>
+    </div>
+
+    <!-- main content -->
+    <div class="main-content">
+        <div class="paragraph">Ký túc xá là cơ sở dùng chung trong toàn ĐHQGHN do Trung tâm hỗ trợ sinh viên của ĐHQGHN
+            quản lý. Có 3 khu Ký túc xá: Ký túc xá Mễ Trì tại địa chỉ 182 Lương Thế Vinh (phục vụ cho sinh viên các
+            Trường ĐH Khoa học Tự nhiên, ĐH Khoa học Xã hội và Nhân văn); Ký túc xá Ngoại Ngữ tại địa chỉ 144 Xuân Thủy
+            (gần khuôn viên UET) phục vụ cho các Trường ĐH Ngoại Ngữ, ĐH Công nghệ, ĐH Kinh tế, Khoa Luật…; Ký túc xá Mỹ
+            Đình tại địa chỉ đường Hàm Nghi, gần sân vận động Mỹ Đình (cách UET 2 km) phụ vụ cho các trường ở khu vực
+            144 Xuân Thủy, trong đó có Trường ĐH Công nghệ. Hàng năm, Ký túc xá Ngoại Ngữ dành khoảng 300 suất cho sinh
+            viên của Trường ĐH Công nghệ, ưu tiên cho các đối tượng con em chính sách, vùng sâu vùng xa, biên giới hải
+            đảo, dân tộc thiểu số…Ký túc xá Mỹ Đình dành khoảng 500 suất cho mọi đối tượng sinh viên của Trường ĐH Công
+            nghệ có nhu cầu.
+            Chi tiết sinh viên xem tại các đường link sau:</div>
+        <div class="paragraph">Chi tiết sinh viên xem tại đường link sau:
+        </div>
+        <div style="display:flex;justify-content:center;"><a class="link-page" href="http://css.vnu.edu.vn/">http://css.vnu.edu.vn/</a></div>
+        <div class="image">
+
+            <img src="./Ký túc xá_files/ktxnn.jpg" alt="">
+            <img src="./Ký túc xá_files/ktxmd.jpg" alt="">
+
+        </div>
+    </div>
+
+    <!-- footer -->
+    <div class="footer">
+        <div class="address">
+            <p style="margin-top:0px;">Phòng 104-E3, 144 Xuân Thủy, Cầu Giấy, Hà Nội</p>
+            <p>Email: ctsv_dhcn@vnu.edu.vn</p>
+            <p>ĐT: 02437548864</p>
+        </div>
+        <div class="actor">
+            <p>Biên tập: Phòng CTSV</p>
+            <p>Thiết kế: SV Trường ĐHCN</p>
+        </div>
+    </div>
+
+    <script src="./Ký túc xá_files/menuButton.js.download"></script>
+    <script src="./Ký túc xá_files/dropDown.js.download"></script>
+
+
+</body></html>
