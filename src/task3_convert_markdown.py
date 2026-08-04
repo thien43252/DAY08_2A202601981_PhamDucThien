@@ -23,6 +23,17 @@ from markitdown import MarkItDown
 
 LANDING_DIR = Path(__file__).parent.parent / "data" / "landing"
 OUTPUT_DIR = Path(__file__).parent.parent / "data" / "standardized"
+LEGAL_EXTENSIONS = {".pdf", ".docx", ".doc", ".html", ".htm"}
+NEWS_EXTENSIONS = {".json", ".html", ".htm", ".md", ".txt"}
+
+
+def _write_markdown(source_path: Path, output_root: Path, content: str):
+    """Write markdown content while preserving the relative folder structure."""
+    relative_path = source_path.relative_to(LANDING_DIR).with_suffix(".md")
+    output_path = output_root / relative_path
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(content, encoding="utf-8")
+    print(f"  ✓ Saved: {output_path}")
 
 
 def convert_legal_docs():
@@ -33,39 +44,42 @@ def convert_legal_docs():
 
     md = MarkItDown()
 
-    for filepath in legal_dir.iterdir():
-        if filepath.suffix.lower() in (".pdf", ".docx", ".doc"):
+    for filepath in sorted(legal_dir.rglob("*")):
+        if filepath.is_file() and filepath.suffix.lower() in LEGAL_EXTENSIONS:
             print(f"Converting: {filepath.name}")
-            # TODO: Convert và lưu file
-            # result = md.convert(str(filepath))
-            # output_path = output_dir / f"{filepath.stem}.md"
-            # output_path.write_text(result.text_content, encoding="utf-8")
-            # print(f"  ✓ Saved: {output_path}")
-            raise NotImplementedError("Implement convert_legal_docs")
+            result = md.convert(str(filepath))
+            _write_markdown(filepath, output_dir, result.text_content)
 
 
 def convert_news_articles():
-    """Convert JSON crawled articles trong data/landing/news/ sang markdown."""
+    """Convert news files trong data/landing/news/ sang markdown."""
     news_dir = LANDING_DIR / "news"
     output_dir = OUTPUT_DIR / "news"
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    for filepath in news_dir.iterdir():
+    md = MarkItDown()
+
+    for filepath in sorted(news_dir.rglob("*")):
+        if not filepath.is_file() or filepath.suffix.lower() not in NEWS_EXTENSIONS:
+            continue
+
+        print(f"Converting: {filepath.name}")
+
         if filepath.suffix.lower() == ".json":
-            print(f"Converting: {filepath.name}")
-            # TODO: Đọc JSON, extract content_markdown, lưu thành .md
-            # data = json.loads(filepath.read_text(encoding="utf-8"))
-            # output_path = output_dir / f"{filepath.stem}.md"
-            #
-            # # Thêm metadata header
-            # header = f"# {data.get('title', 'Unknown')}\n\n"
-            # header += f"**Source:** {data.get('url', 'N/A')}\n"
-            # header += f"**Crawled:** {data.get('date_crawled', 'N/A')}\n\n---\n\n"
-            #
-            # content = header + data.get("content_markdown", "")
-            # output_path.write_text(content, encoding="utf-8")
-            # print(f"  ✓ Saved: {output_path}")
-            raise NotImplementedError("Implement convert_news_articles")
+            data = json.loads(filepath.read_text(encoding="utf-8"))
+            header = f"# {data.get('title', 'Unknown')}\n\n"
+            header += f"**Source:** {data.get('url', 'N/A')}\n"
+            header += f"**Crawled:** {data.get('date_crawled', 'N/A')}\n\n---\n\n"
+
+            body = data.get("content_markdown") or data.get("content") or ""
+            content = header + body
+        elif filepath.suffix.lower() in {".html", ".htm"}:
+            result = md.convert(str(filepath))
+            content = result.text_content
+        else:
+            content = filepath.read_text(encoding="utf-8")
+
+        _write_markdown(filepath, output_dir, content)
 
 
 def convert_all():
