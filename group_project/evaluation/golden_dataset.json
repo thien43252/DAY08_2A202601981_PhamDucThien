@@ -1,17 +1,92 @@
 [
   {
-    "question": "Học phí hàng năm của chương trình Business tại RMIT Vietnam là bao nhiêu?",
-    "expected_answer": "Khoảng 375.840.000 VND mỗi năm (tùy chương trình cụ thể).",
-    "expected_context": "Trang Tuition Fees, mục Undergraduate Programs"
+    "question": "Mỗi học phần có khối lượng bao nhiêu tín chỉ?",
+    "expected_answer": "Mỗi học phần có khối lượng kiến thức từ 2 đến 5 tín chỉ.",
+    "expected_context": "Quy chế đào tạo đại học tại ĐHQGHN, Điều 5",
+    "source_file": "legal/course-registration-regulations-vnu-uet.md"
   },
   {
-    "question": "Học phí được thanh toán theo hình thức nào?",
-    "expected_answer": "Thanh toán theo từng học kỳ, tính theo từng môn học đã đăng ký.",
-    "expected_context": "Trang Tuition Fees, mục Payment Structure"
+    "question": "Tín chỉ được hiểu như thế nào?",
+    "expected_answer": "Tín chỉ là đại lượng xác định khối lượng kiến thức, kỹ năng mà sinh viên tích lũy được từ học phần trong 15 giờ tín chỉ.",
+    "expected_context": "Quy chế đào tạo đại học tại ĐHQGHN, Điều 4",
+    "source_file": "legal/course-registration-regulations-vnu-uet.md"
   },
   {
-    "question": "Trường có cung cấp ký túc xá trong khuôn viên không?",
-    "expected_answer": "Không — trường không cung cấp chỗ ở trong khuôn viên, nhưng có đội ngũ hỗ trợ sinh viên tìm chỗ ở gần trường.",
-    "expected_context": "Trang Accommodation Services"
+    "question": "Các học phần pháp luật do đơn vị nào giảng dạy?",
+    "expected_answer": "Các học phần pháp luật do Trường Đại học Luật giảng dạy.",
+    "expected_context": "Quy chế đào tạo đại học tại ĐHQGHN, Điều 2",
+    "source_file": "legal/course-registration-regulations-vnu-uet.md"
+  },
+  {
+    "question": "Sinh viên phải trả học phí theo hình thức nào?",
+    "expected_answer": "Sinh viên trả học phí theo kỳ hoặc số tín chỉ đăng ký học trong mỗi học kỳ tại đơn vị đào tạo quản lý ngành học mà sinh viên theo học.",
+    "expected_context": "Quy chế đào tạo đại học tại ĐHQGHN, Điều 8",
+    "source_file": "legal/tuition-fees-uet.md"
+  },
+  {
+    "question": "Nếu chậm hoặc nợ học phí thì sinh viên bị xử lý thế nào?",
+    "expected_answer": "Sinh viên không hoàn thành nghĩa vụ nộp học phí đúng hạn sẽ bị cấm thi tất cả các học phần, bị hạ một bậc điểm rèn luyện trong học kỳ tương ứng; nếu nợ từ hai học kỳ trở lên có thể bị xem xét buộc thôi học.",
+    "expected_context": "Quy định nộp học phí tại Trường Đại học Công nghệ, Điều 6",
+    "source_file": "legal/tuition-fees-uet.md"
+  },
+  {
+    "question": "Ký túc xá của ĐHQGHN có những khu nào và khu nào gần UET?",
+    "expected_answer": "ĐHQGHN có 3 khu ký túc xá chính: Mễ Trì, Ngoại Ngữ và Mỹ Đình; khu Ngoại Ngữ tại 144 Xuân Thủy gần khuôn viên UET, còn khu Mỹ Đình ở đường Hàm Nghi và dành cho sinh viên khu vực 144 Xuân Thủy, trong đó có Trường ĐH Công nghệ.",
+    "expected_context": "Trang Ký túc xá",
+    "source_file": "news/article_04.md"
+  },
+  {
+    "question": "Sinh viên nội trú có những quyền gì?",
+    "expected_answer": "Sinh viên nội trú được tôn trọng và đối xử bình đẳng, được ở và sử dụng các trang thiết bị do KTX cung cấp, được bảo đảm an ninh an toàn và vệ sinh môi trường, được chăm lo sức khỏe và được tham gia các hoạt động hỗ trợ đời sống, học tập.",
+    "expected_context": "Quy chế công tác sinh viên nội trú tại ĐHQGHN, Điều 9",
+    "source_file": "legal/dormitory-regulations-vnu-uet.md"
+  },
+  {
+    "question": "Học bổng khuyến khích học tập dành cho sinh viên đại học hệ chính quy có tiêu chí gì?",
+    "expected_answer": "Sinh viên có kết quả học tập, rèn luyện đạt từ loại khá trở lên, không bị kỷ luật từ mức khiển trách trở lên trong kỳ xét cấp học bổng.",
+    "expected_context": "Quy định quản lý và sử dụng học bổng tại ĐHQGHN, Điều 5",
+    "source_file": "legal/scholarship-regulations-vnu-uet.md"
+  },
+  {
+    "question": "Học bổng cho các ngành khoa học cơ bản mang lại những quyền lợi gì?",
+    "expected_answer": "Sinh viên được miễn học phí, bố trí chỗ ở trong ký túc xá cho cả khóa học và được hỗ trợ sinh hoạt phí tối thiểu 2 triệu đồng mỗi tháng trong năm thứ nhất, đồng thời có cơ hội tham gia chương trình ươm tạo nhà khoa học.",
+    "expected_context": "Quy định quản lý và sử dụng học bổng tại ĐHQGHN, Điều 7",
+    "source_file": "legal/scholarship-regulations-vnu-uet.md"
+  },
+  {
+    "question": "Nguồn của học bổng khuyến khích học tập được trích từ đâu?",
+    "expected_answer": "Nguồn học bổng khuyến khích học tập được bố trí tối thiểu 8% nguồn thu học phí.",
+    "expected_context": "Quy định quản lý và sử dụng học bổng tại ĐHQGHN, Điều 5",
+    "source_file": "legal/scholarship-regulations-vnu-uet.md"
+  },
+  {
+    "question": "Điểm rèn luyện được đánh giá như thế nào?",
+    "expected_answer": "Điểm rèn luyện được đánh giá bằng thang điểm 100 cho từng học kỳ, bằng tổng điểm đạt được của 5 nội dung; tổng của 5 mức điểm chuẩn này là 70 điểm.",
+    "expected_context": "Học bổng - Điểm rèn luyện",
+    "source_file": "news/article_01.md"
+  },
+  {
+    "question": "Các mức học bổng khuyến khích học tập cho sinh viên hệ chuẩn là gì?",
+    "expected_answer": "Với sinh viên hệ chuẩn có 3 mức học bổng: Xuất sắc, Giỏi, Khá.",
+    "expected_context": "Học bổng - Điểm rèn luyện",
+    "source_file": "news/article_01.md"
+  },
+  {
+    "question": "Sinh viên có thể nộp học phí theo những cách nào?",
+    "expected_answer": "Có 3 cách nộp học phí: nộp vào tài khoản cá nhân mở tại ngân hàng, chuyển khoản trực tiếp vào tài khoản của nhà trường, hoặc nộp trực tiếp tại Phòng Kế hoạch - Tài chính trong trường hợp bất khả kháng.",
+    "expected_context": "Học phí - Chế độ chính sách",
+    "source_file": "news/article_02.md"
+  },
+  {
+    "question": "Nếu sinh viên chậm hoặc nợ học phí thì bị gì?",
+    "expected_answer": "Sinh viên không hoàn thành nghĩa vụ nộp học phí đúng hạn sẽ bị cấm thi tất cả các học phần, bị hạ một bậc điểm rèn luyện trong học kỳ tương ứng và có thể bị xem xét buộc thôi học nếu nợ từ hai học kỳ trở lên.",
+    "expected_context": "Học phí - Chế độ chính sách",
+    "source_file": "news/article_02.md"
+  },
+  {
+    "question": "Sinh viên ĐHQGHN được khám chữa bệnh ở đâu?",
+    "expected_answer": "Sinh viên ĐHQGHN được khám chữa bệnh tại Bệnh viện ĐHQGHN; thông tin liên quan có thể liên hệ Phòng CTSV hoặc các cơ sở khám chữa bệnh như 182 Lương Thế Vinh và cơ sở Phạm Văn Đồng.",
+    "expected_context": "Khám chữa bệnh",
+    "source_file": "news/article_03.md"
   }
 ]
