@@ -147,10 +147,10 @@ Xem code mẫu (DeepEval/RAGAS/TruLens) chi tiết trong `README.md` gốc mục
 
 | Thành viên                   | MSSV        | Nhiệm vụ                                                                                                 | Trạng thái                  |
 | :----------------------------- | :---------- | :--------------------------------------------------------------------------------------------------------- | :---------------------------- |
-| **Trần Công Chiến**   | 2A202601981 | Điều phối tiến độ, ghép code tổng hợp (`supervisor.py` & Task 9).                               | **Hoàn thành (100%)** |
-| **Phạm Khắc Duy**      | 2A202600002 | Tạo`golden_dataset.json` (15 câu hỏi), thực thi RAGAS `eval_pipeline.py` và viết `results.md`. | **Hoàn thành (100%)** |
-| **Nguyễn Ngọc Thuận** | 2A202600003 | Phụ trách thu thập, chuẩn hoá dữ liệu (Task 1–3) và xây dựng ChromaDB (Task 4–5).              | **Hoàn thành (100%)** |
-| **Phạm Đức Thiện**   | 2A202600004 | Xây dựng giao diện Streamlit`app.py` và nối LLM Generation (Task 10).                               | **Hoàn thành (100%)** |
+| **Trần Công Chiến**   | 2A202601053 | Điều phối tiến độ, ghép code tổng hợp (`supervisor.py` & Task 9).                               | **Hoàn thành (100%)** |
+| **Phạm Khắc Duy**      | 2A202601757 | Tạo`golden_dataset.json` (15 câu hỏi), thực thi RAGAS `eval_pipeline.py` và viết `results.md`. | **Hoàn thành (100%)** |
+| **Nguyễn Ngọc Thuận** | 2A202601949 | Phụ trách thu thập, chuẩn hoá dữ liệu (Task 1–3) và xây dựng ChromaDB (Task 4–5).              | **Hoàn thành (100%)** |
+| **Phạm Đức Thiện**   | 2A202601981 | Xây dựng giao diện Streamlit`app.py` và nối LLM Generation (Task 10).                               | **Hoàn thành (100%)** |
 
 ---
 
