@@ -17,6 +17,7 @@ Hướng dẫn:
 """
 
 import json
+import shutil
 from pathlib import Path
 
 from markitdown import MarkItDown
@@ -27,9 +28,9 @@ LEGAL_EXTENSIONS = {".pdf", ".docx", ".doc", ".html", ".htm"}
 NEWS_EXTENSIONS = {".json", ".html", ".htm", ".md", ".txt"}
 
 
-def _write_markdown(source_path: Path, output_root: Path, content: str):
+def _write_markdown(source_path: Path, source_root: Path, output_root: Path, content: str):
     """Write markdown content while preserving the relative folder structure."""
-    relative_path = source_path.relative_to(LANDING_DIR).with_suffix(".md")
+    relative_path = source_path.relative_to(source_root).with_suffix(".md")
     output_path = output_root / relative_path
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(content, encoding="utf-8")
@@ -40,6 +41,8 @@ def convert_legal_docs():
     """Convert PDF/DOCX files trong data/landing/legal/ sang markdown."""
     legal_dir = LANDING_DIR / "legal"
     output_dir = OUTPUT_DIR / "legal"
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     md = MarkItDown()
@@ -48,13 +51,15 @@ def convert_legal_docs():
         if filepath.is_file() and filepath.suffix.lower() in LEGAL_EXTENSIONS:
             print(f"Converting: {filepath.name}")
             result = md.convert(str(filepath))
-            _write_markdown(filepath, output_dir, result.text_content)
+            _write_markdown(filepath, legal_dir, output_dir, result.text_content)
 
 
 def convert_news_articles():
     """Convert news files trong data/landing/news/ sang markdown."""
     news_dir = LANDING_DIR / "news"
     output_dir = OUTPUT_DIR / "news"
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     md = MarkItDown()
@@ -79,7 +84,7 @@ def convert_news_articles():
         else:
             content = filepath.read_text(encoding="utf-8")
 
-        _write_markdown(filepath, output_dir, content)
+        _write_markdown(filepath, news_dir, output_dir, content)
 
 
 def convert_all():
