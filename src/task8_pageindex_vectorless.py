@@ -17,16 +17,19 @@ Hướng dẫn:
     4. Query sử dụng PageIndex API
 """
 
+from __future__ import annotations
+
 import json
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from dotenv import load_dotenv
-from fpdf import FPDF
-from pageindex.client import PageIndexClient
-
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # dotenv is optional for local tests; environment variables still work.
+    pass
 
 PAGEINDEX_API_KEY = os.getenv("PAGEINDEX_API_KEY", "")
 STANDARDIZED_DIR = Path(__file__).parent.parent / "data" / "standardized"
@@ -49,6 +52,8 @@ def _clean_text(text: str) -> str:
 
 def _convert_md_to_pdf(md_path: Path, pdf_path: Path):
     """Convert file markdown sang PDF tạm bằng fpdf2."""
+    from fpdf import FPDF
+
     raw_content = md_path.read_text(encoding="utf-8")
     content = _clean_text(raw_content)
     pdf = FPDF()
@@ -101,7 +106,13 @@ def upload_documents() -> dict:
     Cache doc_ids vào pageindex_doc_ids.json.
     """
     if not PAGEINDEX_API_KEY:
-        print("⚠ PAGEINDEX_API_KEY không tồn tại trong .env")
+        print("[WARN] PAGEINDEX_API_KEY is not configured")
+        return {}
+
+    try:
+        from pageindex.client import PageIndexClient
+    except ImportError:
+        print("[WARN] pageindex package is not installed; skipping upload")
         return {}
 
     client = PageIndexClient(api_key=PAGEINDEX_API_KEY)
@@ -109,7 +120,7 @@ def upload_documents() -> dict:
 
     md_files = list(STANDARDIZED_DIR.rglob("*.md"))
     if not md_files:
-        print(f"⚠ Không tìm thấy file markdown nào trong {STANDARDIZED_DIR}")
+        print(f"[WARN] No Markdown files found in {STANDARDIZED_DIR}")
         return {}
 
     TEMP_PDF_DIR.mkdir(parents=True, exist_ok=True)
@@ -205,7 +216,7 @@ def _query_single_doc(client: PageIndexClient, doc_id: str, query: str) -> list[
                         "source": "pageindex",
                     })
     except Exception as e:
-        print(f"⚠ Lỗi khi query doc_id {doc_id}: {e}")
+        print(f"[WARN] PageIndex query failed for {doc_id}: {e}")
     return doc_results
 
 
@@ -227,7 +238,13 @@ def pageindex_search(query: str, top_k: int = 5) -> list[dict]:
         }
     """
     if not PAGEINDEX_API_KEY:
-        print("⚠ PAGEINDEX_API_KEY chưa được thiết lập.")
+        print("[WARN] PAGEINDEX_API_KEY is not configured")
+        return []
+
+    try:
+        from pageindex.client import PageIndexClient
+    except ImportError:
+        print("[WARN] pageindex package is not installed; returning no results")
         return []
 
     doc_ids = {}
@@ -268,7 +285,7 @@ def pageindex_search(query: str, top_k: int = 5) -> list[dict]:
 
 if __name__ == "__main__":
     if not PAGEINDEX_API_KEY:
-        print("⚠ Hãy set PAGEINDEX_API_KEY trong file .env")
+        print("[WARN] Set PAGEINDEX_API_KEY in .env before running PageIndex")
         print("  Đăng ký tại: https://pageindex.ai/")
     else:
         print("Uploading documents...")

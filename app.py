@@ -20,6 +20,14 @@ load_dotenv()
 PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+try:
+    from src.task10_generation import generate_with_citation
+    GENERATION_IMPORT_ERROR = None
+except Exception as exc:
+    # Keep the UI importable so the sidebar can explain a missing dependency.
+    generate_with_citation = None
+    GENERATION_IMPORT_ERROR = exc
+
 # =============================================================================
 # PAGE CONFIG & STYLING
 # =============================================================================
@@ -273,7 +281,7 @@ with st.sidebar:
     run_mode = st.radio(
         "Chế độ chạy:",
         ["🧪 Mock Data (Demo UI)", "🚀 Real RAG (Task 9 & 10)"],
-        index=0,
+        index=1,
         help="Chế độ Mock Data giúp thử nghiệm giao diện nhanh mà không cần API key.",
     )
 
@@ -421,13 +429,13 @@ if query:
             else:
                 # Chạy bằng Real RAG Pipeline (Task 9 & Task 10)
                 try:
-                    # TODO (Học viên / Team): Ghép nối chính thức với Task 10
-                    # from src.task10_generation import generate_with_citation
-                    # response = generate_with_citation(query, top_k=top_k)
-                    
-                    from src.task10_generation import generate_with_citation
-                    
-                    # Truyền history nếu muốn hỗ trợ follow-up conversation memory
+                    if generate_with_citation is None:
+                        raise RuntimeError(
+                            f"Không import được src.task10_generation: {GENERATION_IMPORT_ERROR}"
+                        )
+
+                    # Task 10 trả về {'answer': ..., 'sources': ...}; lưu cả hai
+                    # để hiển thị câu trả lời và nguồn tham khảo trong UI.
                     response = generate_with_citation(query, top_k=top_k)
                     answer = response.get("answer", "Chưa có phản hồi từ mô hình.")
                     sources = response.get("sources", [])

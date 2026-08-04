@@ -162,7 +162,7 @@ if __name__ == "__main__":
         "What is the tuition fee at RMIT Vietnam?",
         "How do I book a library study room?",
         "What scholarships are available for international students?",
-        "xyzabc123nonsense",  # Query không có kết quả → test fallback
+        "xyzabc123nonsense", 
     ]
 
     for q in test_queries:

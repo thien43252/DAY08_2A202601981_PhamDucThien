@@ -11,15 +11,19 @@ Yêu cầu:
 """
 
 from pathlib import Path
+import re
+from collections import Counter
 from typing import List, Dict, Any, Optional
 
 CHROMA_DIR = Path(__file__).parent.parent / "chroma_db"
+STANDARDIZED_DIR = Path(__file__).parent.parent / "data" / "standardized"
 COLLECTION_NAME = "university_services_docs"
 EMBEDDING_MODEL_NAME = "BAAI/bge-m3"
 
 # Singleton cache cho Embedding Model và Chroma Client
 _MODEL_CACHE = None
 _COLLECTION_CACHE = None
+_LOCAL_CORPUS_CACHE: list[dict] | None = None
 
 
 def _get_embedding_model():
@@ -76,6 +80,40 @@ def _generate_hypothetical_doc(query: str) -> str:
     return hypothetical_doc
 
 
+def _local_fallback_search(query: str, top_k: int) -> list[dict]:
+    """Small dependency-free fallback for an unavailable vector store.
+
+    It keeps local tests and demos useful before ChromaDB/embeddings are built;
+    production retrieval still prefers the BGE-M3 + ChromaDB path above.
+    """
+    global _LOCAL_CORPUS_CACHE
+    if _LOCAL_CORPUS_CACHE is None:
+        corpus = []
+        for path in sorted(STANDARDIZED_DIR.rglob("*.md")) if STANDARDIZED_DIR.exists() else []:
+            content = path.read_text(encoding="utf-8").strip()
+            if content:
+                relative = path.relative_to(STANDARDIZED_DIR)
+                corpus.append({
+                    "content": content,
+                    "metadata": {"source": relative.as_posix(), "type": relative.parts[0] if relative.parts else "unknown"},
+                })
+        _LOCAL_CORPUS_CACHE = corpus
+
+    query_terms = re.findall(r"\w+", query.lower(), flags=re.UNICODE)
+    if not query_terms or not _LOCAL_CORPUS_CACHE:
+        return []
+    query_counts = Counter(query_terms)
+    query_norm = sum(value * value for value in query_counts.values()) ** 0.5
+    ranked = []
+    for item in _LOCAL_CORPUS_CACHE:
+        counts = Counter(re.findall(r"\w+", item["content"].lower(), flags=re.UNICODE))
+        denominator = query_norm * (sum(value * value for value in counts.values()) ** 0.5)
+        score = sum(query_counts[token] * counts[token] for token in query_counts) / denominator if denominator else 0.0
+        ranked.append({**item, "score": round(float(score), 4)})
+    ranked.sort(key=lambda item: item["score"], reverse=True)
+    return ranked[:top_k]
+
+
 def semantic_search(query: str, top_k: int = 10, use_hyde: bool = True) -> list[dict]:
     """
     Tìm kiếm ngữ nghĩa (dense retrieval) sử dụng Vector Similarity + HyDE.
@@ -106,12 +144,12 @@ def semantic_search(query: str, top_k: int = 10, use_hyde: bool = True) -> list[
     try:
         model = _get_embedding_model()
         if model is None:
-            return []
+            return _local_fallback_search(query, top_k)
         query_vector = model.encode(search_text).tolist()
 
         collection = _get_collection()
         if collection is None or collection.count() == 0:
-            return []
+            return _local_fallback_search(query, top_k)
 
         results = collection.query(
             query_embeddings=[query_vector],
@@ -120,7 +158,7 @@ def semantic_search(query: str, top_k: int = 10, use_hyde: bool = True) -> list[
         )
 
         if not results or not results.get("documents") or not results["documents"][0]:
-            return []
+            return _local_fallback_search(query, top_k)
 
         output = []
         documents = results["documents"][0]
@@ -140,7 +178,7 @@ def semantic_search(query: str, top_k: int = 10, use_hyde: bool = True) -> list[
         output.sort(key=lambda x: x["score"], reverse=True)
         return output[:top_k]
     except Exception:
-        return []
+        return _local_fallback_search(query, top_k)
 
 
 
