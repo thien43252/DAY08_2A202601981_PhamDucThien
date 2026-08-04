@@ -277,7 +277,7 @@ with st.sidebar:
     run_mode = st.radio(
         "Chế độ chạy:",
         ["🧪 Mock Data (Demo UI)", "🚀 Real RAG (Task 9 & 10)"],
-        index=0,
+        index=1,
         help="Chế độ Mock Data giúp thử nghiệm giao diện nhanh mà không cần API key.",
     )
 
@@ -319,7 +319,13 @@ with st.sidebar:
 
     # Nút xóa lịch sử trò chuyện
     if st.button("🗑️ Xóa lịch sử chat", use_container_width=True, type="secondary"):
-        st.session_state.messages = []
+        st.session_state.messages = [
+            {
+                "role": "assistant",
+                "content": "Xin chào! Tôi là Trợ lý AI hỗ trợ giải đáp chính sách và dịch vụ đại học (Học phí, Học bổng, Thư viện, Ký túc xá). Bạn cần hỗ trợ thông tin gì hôm nay?",
+                "sources": [],
+            }
+        ]
         st.session_state.pending_query = None
         st.rerun()
 
@@ -374,25 +380,31 @@ for msg in st.session_state.messages:
         # Hiển thị nguồn tham khảo kèm score (Theo yêu cầu đề bài - Bước 3: st.expander)
         if msg["role"] == "assistant" and "sources" in msg and msg["sources"]:
             sources = msg["sources"]
-            with st.expander(f"📚 Nguồn tham khảo ({len(sources)} chunks)", expanded=False):
+            with st.expander(f"📚 Nguồn tham khảo ({len(sources)} nguồn)", expanded=False):
                 for i, src in enumerate(sources, 1):
                     meta = src.get("metadata", {})
-                    source_name = meta.get("source") or meta.get("file_name") or "Tài liệu chính sách"
+                    source_path = meta.get("source") or meta.get("file_name") or "Tài liệu chính sách"
+                    source_name = source_path.rsplit("/", 1)[-1].replace(".md", "").replace("-", " ").replace("_", " ")
                     doc_type = meta.get("type", "document")
                     score = src.get("score", 0.0)
-                    content = src.get("content", "")
+                    chunk_idx = meta.get("chunk_index", "")
+                    chunk_label = f' · chunk #{chunk_idx}' if chunk_idx != "" else ""
+                    preview = src.get("content", "")[:150].replace("\n", " ").strip()
+                    if len(src.get("content", "")) > 150:
+                        preview += "..."
 
                     st.markdown(
                         f"""
                         <div class="source-box">
                             <div class="source-header">
-                                <span><b>[{i}] {source_name}</b></span>
+                                <span>📄 <b>[{i}] {source_name}</b>{chunk_label}</span>
                                 <div>
                                     <span class="source-badge">{doc_type}</span>
                                     <span class="score-badge">Score: {score:.4f}</span>
                                 </div>
                             </div>
-                            <div class="source-content">{content}</div>
+                            <div style="color:#64748b;font-size:0.8rem;margin-top:2px;">📂 {source_path}</div>
+                            <div class="source-content">{preview}</div>
                         </div>
                         """,
                         unsafe_allow_html=True,
@@ -452,25 +464,31 @@ if query:
 
             # Display citations expander immediately for new response
             if sources:
-                with st.expander(f"📚 Nguồn tham khảo ({len(sources)} chunks)", expanded=False):
+                with st.expander(f"📚 Nguồn tham khảo ({len(sources)} nguồn)", expanded=False):
                     for i, src in enumerate(sources, 1):
                         meta = src.get("metadata", {})
-                        source_name = meta.get("source") or meta.get("file_name") or "Tài liệu chính sách"
+                        source_path = meta.get("source") or meta.get("file_name") or "Tài liệu chính sách"
+                        source_name = source_path.rsplit("/", 1)[-1].replace(".md", "").replace("-", " ").replace("_", " ")
                         doc_type = meta.get("type", "document")
                         score = src.get("score", 0.0)
-                        content = src.get("content", "")
+                        chunk_idx = meta.get("chunk_index", "")
+                        chunk_label = f' · chunk #{chunk_idx}' if chunk_idx != "" else ""
+                        preview = src.get("content", "")[:150].replace("\n", " ").strip()
+                        if len(src.get("content", "")) > 150:
+                            preview += "..."
 
                         st.markdown(
                             f"""
                             <div class="source-box">
                                 <div class="source-header">
-                                    <span><b>[{i}] {source_name}</b></span>
+                                    <span>📄 <b>[{i}] {source_name}</b>{chunk_label}</span>
                                     <div>
                                         <span class="source-badge">{doc_type}</span>
                                         <span class="score-badge">Score: {score:.4f}</span>
                                     </div>
                                 </div>
-                                <div class="source-content">{content}</div>
+                                <div style="color:#64748b;font-size:0.8rem;margin-top:2px;">📂 {source_path}</div>
+                                <div class="source-content">{preview}</div>
                             </div>
                             """,
                             unsafe_allow_html=True,
