@@ -14,9 +14,10 @@ Base URL: "https://openrouter.ai/api/v1", dùng chung interface với OpenAI SDK
 """
 
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+from src.env_utils import get_api_key, load_project_env
+
+load_project_env()
 
 try:
     from .task9_retrieval_pipeline import retrieve
@@ -161,8 +162,8 @@ def generate_with_citation(query: str, top_k: int = TOP_K) -> dict:
     # Step 5: Call LLM (OpenRouter API với fallback sang OpenAI API nếu bị limit/lỗi)
     from openai import OpenAI
 
-    openrouter_key = os.getenv("OPENROUTER_API_KEY")
-    openai_key = os.getenv("OPENAI_API_KEY")
+    openrouter_key = get_api_key("OPENROUTER_API_KEY", "OPENAI_API_KEY", "OPEN_AI_API_KEY")
+    openai_key = get_api_key("OPENAI_API_KEY", "OPEN_AI_API_KEY")
 
     response = None
     if openrouter_key:
@@ -203,7 +204,7 @@ def generate_with_citation(query: str, top_k: int = TOP_K) -> dict:
             top_p=TOP_P,
         )
     else:
-        raise ValueError("Neither OPENROUTER_API_KEY nor OPENAI_API_KEY is set.")
+        raise ValueError("Neither OPENROUTER_API_KEY nor OPENAI_API_KEY/OPEN_AI_API_KEY is set.")
 
     answer = response.choices[0].message.content if response else ""
 

@@ -1,56 +1,58 @@
 # RAG Evaluation Results
 
-## Framework sử dụng
+## Run Settings
 
-> Ghi rõ framework đã chọn: DeepEval / RAGAS / TruLens
-
----
+- Backend: fallback_local
+- Sample count: 5
+- Full dataset enabled: False
+- Pipeline passthrough enabled: False
 
 ## Overall Scores
 
-| Metric | Config A (hybrid + rerank) | Config B (dense-only) | Δ |
-|--------|---------------------------|----------------------|---|
-| Faithfulness | | | |
-| Answer Relevance | | | |
-| Context Recall | | | |
-| Context Precision | | | |
-| **Average** | | | |
+| Metric | Score |
+|---|---:|
+| faithfulness | 0.017 |
+| answer_relevancy | 0.000 |
+| context_recall | 0.992 |
+| context_precision | 0.022 |
 
----
+## A/B Comparison
 
-## A/B Comparison Analysis
+| Config | Faithfulness | Answer Relevance | Context Recall | Context Precision |
+|---|---:|---:|---:|---:|
+| bm25 | 0.017 | 0.000 | 0.992 | 0.022 |
+| tfidf | 0.025 | 0.000 | 0.992 | 0.024 |
 
-**Config A:**
-> Mô tả config ...
+## Worst Performers
 
-**Config B:**
-> Mô tả config ...
-
-**Kết luận:**
-> Config nào tốt hơn? Vì sao? (2-3 câu)
-
----
-
-## Worst Performers (Bottom 3)
-
-| # | Question | Faithfulness | Relevance | Recall | Failure Stage | Root Cause |
-|---|----------|-------------|-----------|--------|---------------|------------|
-| 1 | | | | | | |
-| 2 | | | | | | |
-| 3 | | | | | | |
-
----
+- Sinh viên phải trả học phí theo hình thức nào?
+  - Faithfulness: 0.017
+  - Answer relevance: 0.000
+  - Context recall: 0.958
+  - Context precision: 0.012
+- Sinh viên nội trú có những quyền gì?
+  - Faithfulness: 0.006
+  - Answer relevance: 0.000
+  - Context recall: 1.000
+  - Context precision: 0.010
+- Mỗi học phần có khối lượng bao nhiêu tín chỉ?
+  - Faithfulness: 0.019
+  - Answer relevance: 0.000
+  - Context recall: 1.000
+  - Context precision: 0.015
+- Học bổng khuyến khích học tập dành cho sinh viên đại học hệ chính quy có tiêu chí gì?
+  - Faithfulness: 0.022
+  - Answer relevance: 0.000
+  - Context recall: 1.000
+  - Context precision: 0.035
+- Ký túc xá của ĐHQGHN có những khu nào và khu nào gần UET?
+  - Faithfulness: 0.021
+  - Answer relevance: 0.000
+  - Context recall: 1.000
+  - Context precision: 0.039
 
 ## Recommendations
 
-### Cải tiến 1
-**Action:**
-**Expected impact:**
-
-### Cải tiến 2
-**Action:**
-**Expected impact:**
-
-### Cải tiến 3
-**Action:**
-**Expected impact:**
+- Giữ sample size nhỏ khi demo nếu dùng OpenRouter free để tránh rate limit.
+- Nếu cần chạy full dataset, tăng dần `RAGAS_SAMPLE_LIMIT` sau khi xác nhận quota.
+- Context precision thấp thường là tín hiệu cần chỉnh retrieval trước generation.
