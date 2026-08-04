@@ -18,14 +18,14 @@ BM25 hoạt động thế nào:
 import re
 from pathlib import Path
 
-from rank_bm25 import BM25Okapi
+from rank_bm25 import BM25Okapi, BM25Plus
 
 STANDARDIZED_DIR = Path(__file__).parent.parent / "data" / "standardized"
 
 # Lazily populated corpus/index so the module works even if conversion runs later.
 CORPUS: list[dict] = []  # List of {'content': str, 'metadata': dict}
 _TOKENIZED_CORPUS: list[list[str]] = []
-_BM25_INDEX: BM25Okapi | None = None
+_BM25_INDEX: BM25Plus | None = None
 
 
 def _tokenize(text: str) -> list[str]:
@@ -47,9 +47,10 @@ def _load_corpus() -> list[dict]:
         content = md_file.read_text(encoding="utf-8")
         relative_path = md_file.relative_to(STANDARDIZED_DIR)
         doc_type = relative_path.parts[0] if relative_path.parts else "unknown"
+        indexed_content = f"{md_file.stem}\n{relative_path.as_posix()}\n\n{content}"
         documents.append(
             {
-                "content": content,
+                "content": indexed_content,
                 "metadata": {
                     "source": str(relative_path),
                     "title": md_file.stem,
@@ -61,7 +62,7 @@ def _load_corpus() -> list[dict]:
     return documents
 
 
-def _ensure_index() -> BM25Okapi | None:
+def _ensure_index() -> BM25Plus | None:
     """Build the corpus and BM25 index on first use."""
     global CORPUS, _TOKENIZED_CORPUS, _BM25_INDEX
 
@@ -75,7 +76,7 @@ def _ensure_index() -> BM25Okapi | None:
         return None
 
     _TOKENIZED_CORPUS = [_tokenize(doc["content"]) for doc in CORPUS]
-    _BM25_INDEX = BM25Okapi(_TOKENIZED_CORPUS)
+    _BM25_INDEX = BM25Plus(_TOKENIZED_CORPUS)
     return _BM25_INDEX
 
 
@@ -87,7 +88,7 @@ def build_bm25_index(corpus: list[dict]):
         corpus: List of {'content': str, 'metadata': dict}
     """
     tokenized_corpus = [_tokenize(doc["content"]) for doc in corpus if doc.get("content")]
-    return BM25Okapi(tokenized_corpus)
+    return BM25Plus(tokenized_corpus)
 
 
 def lexical_search(query: str, top_k: int = 10) -> list[dict]:
@@ -120,8 +121,6 @@ def lexical_search(query: str, top_k: int = 10) -> list[dict]:
     results: list[dict] = []
     for idx in ranked_indices[:top_k]:
         score = float(scores[idx])
-        if score <= 0:
-            continue
         results.append(
             {
                 "content": CORPUS[idx]["content"],
