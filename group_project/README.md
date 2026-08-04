@@ -11,12 +11,14 @@ Sau khi hoàn thành bài cá nhân, nhóm ngồi lại để xây dựng **1 tr
 Xây dựng chatbot trả lời câu hỏi về dịch vụ và chính sách đại học liên quan.
 
 **Yêu cầu:**
+
 - Giao diện chat (Streamlit / Gradio / Chainlit)
 - Trả lời có citation (dựa trên Task 10)
 - Hỗ trợ follow-up questions (conversation memory)
 - Hiển thị source documents đã dùng
 
 **Stack gợi ý:**
+
 ```
 Chainlit/Streamlit → Retrieval (Task 9) → Generation (Task 10) → Display
 ```
@@ -29,11 +31,11 @@ Sử dụng **1 trong 3 framework** sau để evaluate pipeline RAG của nhóm:
 
 ### Framework lựa chọn
 
-| Framework | Cài đặt | Đặc điểm |
-|-----------|---------|-----------|
+| Framework                                           | Cài đặt               | Đặc điểm                                      |
+| --------------------------------------------------- | ------------------------ | ------------------------------------------------- |
 | [DeepEval](https://github.com/confident-ai/deepeval) | `pip install deepeval` | Nhiều metric built-in, dễ integrate với pytest |
-| [RAGAS](https://github.com/explodinggradients/ragas) | `pip install ragas` | Chuẩn industry cho RAG eval, 3 trục chính |
-| [TruLens](https://github.com/truera/trulens) | `pip install trulens` | Dashboard UI, feedback functions mạnh |
+| [RAGAS](https://github.com/explodinggradients/ragas) | `pip install ragas`    | Chuẩn industry cho RAG eval, 3 trục chính      |
+| [TruLens](https://github.com/truera/trulens)         | `pip install trulens`  | Dashboard UI, feedback functions mạnh            |
 
 ### Yêu cầu Evaluation
 
@@ -69,33 +71,131 @@ Xem code mẫu (DeepEval/RAGAS/TruLens) chi tiết trong `README.md` gốc mục
 
 ## Kiến Trúc Hệ Thống
 
+**Sơ đồ luồng xử lý chi tiết (ASCII Flowchart):**
+
 ```
-[Vẽ diagram kiến trúc ở đây]
++-----------------------------------------------------------------------------------+
+|                            DATA INGESTION & PIPELINE                              |
++-----------------------------------------------------------------------------------+
+|  [PDF/DOCX Legal Docs]  +  [News JSON/HTML]                                       |
+|            │                     │                                                |
+|            ▼                     ▼                                                |
+|     (Task 1 & Task 2)  ──>  [MarkItDown Conversion] (Task 3)                      |
+|                                  │                                                |
+|                                  ▼                                                |
+|                   [data/standardized/*.md Files]                                  |
++----------------------------------┬------------------------------------------------+
+                                   │
+                                   ▼
++-----------------------------------------------------------------------------------+
+|                            INDEXING & STORAGE MODULE                              |
++-----------------------------------------------------------------------------------+
+|   [RecursiveCharacterTextSplitter] (chunk_size=800, overlap=100)                  |
+|            ├───────────────────────────────┐                                      |
+|            ▼                               ▼                                      |
+|   [BAAI/bge-m3 Embeddings]        [BM25 Tokenizer]                                |
+|            │                               │                                      |
+|            ▼                               ▼                                      |
+|  [(ChromaDB Vector Store)]       [BM25 Lexical Corpus Index]                      |
++------------┬───────────────────────────────┬--------------------------------------+
+             │                               │
+             └───────────────────────┬───────┘
+                                     │
+                                     ▼
++-----------------------------------------------------------------------------------+
+|                        HYBRID RETRIEVAL & RERANKING                               |
++-----------------------------------------------------------------------------------+
+|  User Query ─────────┬───────────────────────────────┐                            |
+|                      ▼                               ▼                            |
+|            (Task 5: Semantic Search)      (Task 6: Lexical Search BM25)           |
+|                      │                               │                            |
+|                      └───────────────┬───────────────┘                            |
+|                                      ▼                                            |
+|                        (Task 7: RRF Hybrid Fusion / Reranker)                     |
+|                                      │                                            |
+|                                      ▼                                            |
+|                         [Top Similarity Score Check]                              |
+|                          /                        \                               |
+|              (Score >= Threshold)            (Score < Threshold)                  |
+|                        │                              │                           |
+|                        ▼                              ▼                           |
+|               [Hybrid Candidate Chunks]     (Task 8: PageIndex Fallback)          |
+|                        │                              │                           |
+|                        └───────────────┬──────────────┘                           |
++--------------------------------────────┼------------------------------------------+
+                                         │
+                                         ▼
++-----------------------------------------------------------------------------------+
+|                      GENERATION & USER INTERFACE                                  |
++-----------------------------------------------------------------------------------+
+|  (Task 10: Reorder Chunks for 'Lost in the Middle' Mitigation)                    |
+|                        │                                                          |
+|                        ▼                                                          |
+|  [Prompt Engineering + System Instructions for Citations]                         |
+|                        │                                                          |
+|                        ▼                                                          |
+|  [LLM Generation (OpenRouter / Gemini API)]                                       |
+|                        │                                                          |
+|                        ▼                                                          |
+|  [Streamlit Chatbot UI (app.py)] <──> [RAGAS Evaluation (results.md)]             |
++-----------------------------------------------------------------------------------+
 ```
 
 ---
 
 ## Phân Công Công Việc
 
-| Thành viên | MSSV | Nhiệm vụ | Trạng thái |
-|-----------|------|----------|------------|
-| | | | |
-| | | | |
-| | | | |
-| | | | |
+| Thành viên                   | MSSV        | Nhiệm vụ                                                                                                 | Trạng thái                  |
+| :----------------------------- | :---------- | :--------------------------------------------------------------------------------------------------------- | :---------------------------- |
+| **Trần Công Chiến**   | 2A202601981 | Điều phối tiến độ, ghép code tổng hợp (`supervisor.py` & Task 9).                               | **Hoàn thành (100%)** |
+| **Phạm Khắc Duy**      | 2A202600002 | Tạo`golden_dataset.json` (15 câu hỏi), thực thi RAGAS `eval_pipeline.py` và viết `results.md`. | **Hoàn thành (100%)** |
+| **Nguyễn Ngọc Thuận** | 2A202600003 | Phụ trách thu thập, chuẩn hoá dữ liệu (Task 1–3) và xây dựng ChromaDB (Task 4–5).              | **Hoàn thành (100%)** |
+| **Phạm Đức Thiện**   | 2A202600004 | Xây dựng giao diện Streamlit`app.py` và nối LLM Generation (Task 10).                               | **Hoàn thành (100%)** |
 
 ---
 
 ## Hướng Dẫn Chạy
 
-```bash
-# Cài đặt dependencies
-pip install -r requirements.txt
+### 1. Môi Trường & Dependencies
 
-# Chạy app
+```bash
+# Khởi tạo môi trường ảo Python
+python -m venv .venv
+# Kích hoạt trên Windows PowerShell:
+.venv\Scripts\Activate.ps1
+
+# Cài đặt tất cả thư viện cần thiết
+pip install -r requirements.txt
+```
+
+### 2. Cấu Hình API Key
+
+Tạo file `.env` từ `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Điền các API Key trong file `.env`:
+
+- `OPENROUTER_API_KEY`: Dùng cho mô hình LLM Generation
+- `JINA_API_KEY`: (Tùy chọn) Dùng cho Reranking
+- `PAGEINDEX_API_KEY`: (Tùy chọn) Dùng cho Vectorless Fallback
+
+### 3. Chạy Chatbot Streamlit (Yêu cầu 1)
+
+```bash
 streamlit run app.py
-# hoặc
-chainlit run app.py
+```
+
+### 4. Chạy Đánh Giá RAG Evaluation (Yêu cầu 2)
+
+```bash
+# Chạy đánh giá offline (BM25 vs TF-IDF A/B Testing):
+python group_project/evaluation/eval_pipeline_offline.py
+
+# Chạy đánh giá qua RAGAS / DeepEval API:
+python group_project/evaluation/eval_pipeline_ragas.py
 ```
 
 ---
